@@ -1,0 +1,134 @@
+<html lang="en">
+
+<head lang="nl">
+    <meta charset="utf-8">
+
+    <title>EUSim</title>
+    <meta name="description" content="Fieldtrip">
+    <meta name="author" content="Koen van den Berk">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/custom-css-bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/flag-icon.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anton">
+
+
+
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+  <![endif]-->
+</head>
+
+<body class="bg-light">
+
+    <div class="container">
+
+        <div class="pt-5 text-center">
+            <!--            <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">-->
+            <h2>EU Simulation Calculator</h2>
+            <p class="lead"></p>
+        </div>
+
+
+        <h3 class="mb-4">Percentages</h3>
+        <hr>
+        <div class="row mb-4">
+            <label for="population-percentage" class="col-2 col-form-label order-md-1">Population</label>
+            <label for="population-percentage" class="slider-value col-2 col-form-label order-md-1 text-right" id="populationLabel"></label>
+            <div class="col-8 order-md-2">
+                <input type="range" min="0" max="100" value="30" step="1" class="slider w-100" id="populationSlider">
+            </div>
+        </div>
+        <div class="row mb-4">
+            <label for="gdp-percentage" class="col-2 col-form-label order-md-1">GDP</label>
+            <label for="gdp-percentage" class="slider-value col-2 col-form-label order-md-1 text-right" id="gdpLabel"></label>
+            <div class="col-8 order-md-2">
+                <input type="range" min="0" max="100" value="30" step="1" class="slider w-100" id="gdpSlider">
+            </div>
+        </div>
+        <div class="row mb-5">
+            <label for="migration-percentage" class="col-2 col-form-label order-md-1">Previous asylum</label>
+            <label for="migration-percentage" class="slider-value col-2 col-form-label order-md-1 text-right" id="migrationLabel"></label>
+            <div class="col-8 order-md-2">
+                <input type="range" min="0" max="100" value="40" step="1" class="slider w-100" id="migrationSlider">
+            </div>
+        </div>
+
+
+        <h3>Additional information</h3>
+        <hr>
+        <div class="row mb-3">
+            <label for="example-number-input" class="col-3 col-form-label">Expected number of refugees (%)</label>
+            <div class="col-3">
+                <input class="form-control" type="number" value="100000" min="0" id="expectedRefugees">
+            </div>
+        </div>
+        <div class="row">
+            <label for="example-number-input" class="col-3 col-form-label order-md-1">Net migration lookback (years)</label>
+            <div class="col-3 order-md-2">
+                <input class="form-control" type="number" value="3" max="10" min="1" id="migrationLookback">
+            </div>
+            <div class="col text-right py-3 order-md-4">
+                Previous asylum calculation: Fairshare reduction
+            </div>
+        </div>
+        <button type="submit" id="refreshButton" class="btn btn-primary float-right w-25 mb-5">Refresh</button>
+
+
+
+        <div class="row" id="chart-holder">
+            <canvas id="bar-chart"></canvas>
+        </div>
+
+
+        <table class=" table" id="main-data-table ">
+            <colgroup>
+                <col align="left">
+                <col align="left">
+                <col align="right">
+                <col align="right">
+                <col align="right">
+                <col align="right">
+                <col span="2" class="important-col" align="right">
+            </colgroup>
+            <thead>
+                <tr id="tableHeaderRow">
+                    <th scope="col" dataHeader="flag" class="left-aligned-col">Flag</th>
+                    <th scope="col" dataHeader="countryName" class="left-aligned-col">Country</th>
+                    <th scope="col" dataHeader="populationReal">Population (millions)</th>
+                    <th scope="col" dataHeader="gdpReal">GDP (millions USD)</th>
+                    <th scope="col" dataHeader="netMigration">Net migration past <span class="migrationLookbackHeader">x</span> years</th>
+                    <th scope="col" dataHeader="averageNetMigration">Average yearly net migration <br>(<span class="migrationLookbackHeader">x</span> years) </th>
+                    <th scope="col" dataHeader="proposedApplications" class="important-col">Proposed yearly refugee applications</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+
+        <footer class="my-5 pt-5 text-muted text-center text-small ">
+            <p class="mb-1 ">&copy; 2019 Koen van den Berk</p>
+            <p class="mb-1 ">BFTF 2018 at Wake Forest</p>
+            <!--
+            <ul class="list-inline ">
+                <li class="list-inline-item "><a href="# ">Privacy</a></li>
+                <li class="list-inline-item "><a href="# ">Terms</a></li>
+                <li class="list-inline-item "><a href="# ">Support</a></li>
+            </ul>
+-->
+        </footer>
+
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
+    <script src="js/script.js "></script>
+
+
+</body>
+
+</html>
