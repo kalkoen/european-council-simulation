@@ -75,10 +75,10 @@ $(document).ready(function () {
             calculateNetImmigration(migrationLookback);
         }
         calculateProposedApplications();
-        
+
         fillTable();
         updateGraph();
-        
+
     });
 });
 
@@ -132,18 +132,18 @@ function updateSlider(percentage, value) {
 function calculateProposedApplications() {
 
     var nCountries = countryData.countryName.length;
-    
+
     var i;
     for (i = 0; i < nCountries; i++) {
         // Reset
         countryData.proposedApplications[i] = 0
     }
-    
+
     var expectedNrRefugees = inputRefugees.value;
-    
-    
-    
-    
+
+
+
+
     // Population
     var totalPopulation = countryData["populationReal"].reduce((a, b) => a + b, 0)
 
@@ -154,9 +154,9 @@ function calculateProposedApplications() {
         // Reset
         countryData.proposedApplications[i] += populationPart * countryData["populationReal"][i] / totalPopulation
     }
-    
-    
-    
+
+
+
     // Gdp
     var totalGdp = countryData["gdpReal"].reduce((a, b) => a + b, 0)
 
@@ -167,9 +167,9 @@ function calculateProposedApplications() {
         // Reset
         countryData.proposedApplications[i] += gdpPart * countryData["gdpReal"][i] / totalGdp
     }
-    
-    
-    
+
+
+
     // PreviousAsylum
 
     var Inew = expectedNrRefugees * migration.value / 100;
@@ -184,8 +184,8 @@ function calculateProposedApplications() {
 
     // Normalize compensation so that Asl is never higher than the amount of new refugees (or else countries get negative proposed applications)
     var maxC = Math.max.apply(null, countryData.c);
-    
-    var normalShare = Inew/nCountries;
+
+    var normalShare = Inew / nCountries;
     if (maxC > normalShare) {
         var i;
         for (i = 0; i < nCountries; i++) {
@@ -208,14 +208,14 @@ function calculateProposedApplications() {
         // Reset
         countryData.proposedApplications[i] = Math.round(countryData.proposedApplications[i]);
     }
-    
+
     console.log(countryData.proposedApplications.reduce((a, b) => a + b, 0))
-    
-    
+
+
     var newMax = Math.max.apply(null, countryData.proposedApplications) * proposedMaxMultiplier;
     var currentProposedMax = chart.options.scales.yAxes[0].ticks.suggestedMax;
-    if(typeof(currentProposedMax) == "undefined" || newMax > currentProposedMax || newMax*proposedMaxMultiplier/currentProposedMax <= newProposedMaxRange) {
-        chart.options.scales.yAxes[0].ticks.suggestedMax = newMax*proposedMaxMultiplier;
+    if (typeof (currentProposedMax) == "undefined" || newMax > currentProposedMax || newMax * proposedMaxMultiplier / currentProposedMax <= newProposedMaxRange) {
+        chart.options.scales.yAxes[0].ticks.suggestedMax = newMax * proposedMaxMultiplier;
     }
 }
 
@@ -330,47 +330,55 @@ function updateGraph() {
     });
 
 
-    
+
     chart.update();
 }
 
 function createGraph() {
     Chart.defaults.global.animation.duration = 2000;
+    Chart.defaults.global.tooltipTemplate = "<%= addCommas(value) %>";
     var ctx = document.getElementById("bar-chart").getContext('2d');
     chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: [],
             datasets: [{
-//                yAxisID: "y-axis-pop",
+                //                yAxisID: "y-axis-pop",
                 label: 'Population',
                 dataHeader: 'populationReal',
                 hidden: true,
                 fillColor: "rgba(220,220,220,0.5)",
                 data: []
             }, {
-//                yAxisID: "y-axis-migration",
+                //                yAxisID: "y-axis-migration",
                 label: 'Average net migration',
-                dataHeader: 'averageNetMigration', 
+                dataHeader: 'averageNetMigration',
                 hidden: true,
                 data: []
             }, {
-//                yAxisID: "y-axis-gdp",
+                //                yAxisID: "y-axis-gdp",
                 label: 'GDP (millions USD)',
                 dataHeader: 'gdpReal',
                 hidden: "true",
                 data: []
             }, {
-//                yAxisID: "y-axis-pa",
+                //                yAxisID: "y-axis-pa",
                 label: 'Proposed yearly applications',
                 dataHeader: 'proposedApplications',
-                fillColor: "yellow", 
+                fillColor: "yellow",
                 data: []
             }]
         },
         options: {
             responsiveAnimationDuration: 2000,
             maintainAspectRatio: false,
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItems, data) {
+                        return data.labels[tooltipItems.index] + ": " + data.datasets[tooltipItems.datasetIndex].data[tooltipItems.index].toLocaleString();
+                    }
+                }
+            },
             scales: {
                 xAxes: [{
                     ticks: {
@@ -397,13 +405,28 @@ function createGraph() {
 //                        beginAtZero: true
 //                    }
 //                },
-                {
-//                    id: "y-axis-takein",
-                    ticks: {
-                        beginAtZero: true
-                    }
+                    {
+                        //                    id: "y-axis-takein",
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function (value, index, values) {
+                                return value.toLocaleString();
+                            }
+                        }
                 }]
             }
         }
     });
+}
+
+function addCommas(nStr) {
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
 }
